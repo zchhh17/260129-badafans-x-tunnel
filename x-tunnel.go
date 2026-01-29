@@ -2547,7 +2547,7 @@ func runSOCKS5Listener(addr string) {
 
 func handleSOCKS5(c net.Conn, cfgp *ProxyConfig) {
 	defer c.Close()
-	_ = c.SetDeadline(time.Now().Add(3 * time.Second))
+	_ = c.SetDeadline(time.Now().Add(cfg.DialTimeout))
 	buf := make([]byte, 2)
 	if _, err := io.ReadFull(c, buf); err != nil || buf[0] != 0x05 {
 		return
@@ -2770,6 +2770,16 @@ func (a *UDPAssociation) send(target string, data []byte) {
 
 	if needStart {
 		a.pool.StartUDPRace(a.connID, target)
+		if !a.pool.WaitConnected(a.connID, cfg.DialTimeout) {
+			a.Close()
+			return
+		}
+		if id, ok := a.pool.GetUplinkChannel(a.connID); ok {
+			a.mu.Lock()
+			a.channelID = id
+			chID = id
+			a.mu.Unlock()
+		}
 	}
 
 	if chID < 0 {
@@ -2905,7 +2915,7 @@ func runHTTPListener(addr string) {
 
 func handleHTTP(c net.Conn, cfgp *ProxyConfig) {
 	defer c.Close()
-	_ = c.SetDeadline(time.Now().Add(3 * time.Second))
+	_ = c.SetDeadline(time.Now().Add(cfg.DialTimeout))
 	br := bufio.NewReader(c)
 	req, err := http.ReadRequest(br)
 	if err != nil {
