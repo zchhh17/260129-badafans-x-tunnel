@@ -25,7 +25,7 @@ jobs:
 
       - name: Add upstream repo
         run: |
-          git remote add upstream https://github.com/badafans/socksforward.git || true
+          git remote add upstream https://github.com/badafans/x-tunnel.git || true
 
       - name: Fetch upstream (all branches & tags)
         run: |
