@@ -23,14 +23,14 @@ jobs:
           mkdir -p releases
           page=1
           while true; do
-            data=$(gh api repos/badafans/socksforward/releases?page=$page)
+            data=$(gh api repos/badafans/x-tunnel/releases?page=$page)
             count=$(echo "$data" | jq length)
             [ "$count" -eq 0 ] && break
 
             echo "$data" | jq -r '.[] | .tag_name' | while read tag; do
               echo "Downloading assets for $tag"
               gh release download "$tag" \
-                --repo badafans/socksforward \
+                --repo badafans/x-tunnel \
                 --dir "releases/$tag" || true
             done
 
@@ -57,7 +57,7 @@ jobs:
               gh release create "$tag" "$dir"/* \
                 --repo "$GITHUB_REPOSITORY" \
                 --title "$tag" \
-                --notes "Backup from badafans/socksforward"
+                --notes "Backup from badafans/x-tunnel"
             fi
           done
         env:
